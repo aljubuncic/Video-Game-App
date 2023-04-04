@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class GameDetailsActivity : AppCompatActivity(){
+    private lateinit var logoImage: ImageView
     private lateinit var homeButton: Button
     private lateinit var detailsButton: Button
     private lateinit var game: Game
@@ -30,6 +31,7 @@ class GameDetailsActivity : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.game_details_activity)
 
+        logoImage = findViewById(R.id.logo_image)
         homeButton = findViewById(R.id.home_button)
         detailsButton = findViewById(R.id.details_button)
         detailsButton = findViewById(R.id.details_button)
@@ -52,6 +54,7 @@ class GameDetailsActivity : AppCompatActivity(){
         else
             finish()
 
+        logoImage.setImageResource(R.drawable.joystick_logo)
         userImpressions.layoutManager = LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
         userImpressionListAdapter = UserImpressionListAdapter(game.userImpressions.sortedByDescending { userImpression -> userImpression.timestamp })
         userImpressions.adapter = userImpressionListAdapter
