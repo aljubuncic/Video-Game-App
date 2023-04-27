@@ -13,8 +13,6 @@
         android:theme="@style/Theme.VideoGameApp"
         tools:targetApi="31">
         <activity
-            android:name=".GameDetailsActivity"/>
-        <activity
             android:name=".HomeActivity"
             android:exported="true">
             <intent-filter>

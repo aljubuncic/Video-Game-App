@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_nav"
+    app:startDestination="@id/HomeFragment">
+
+    <fragment
+        android:id="@+id/HomeFragment"
+        android:name="ba.unsa.etf.rma.videogameapp.HomeFragment"
+        android:label="HomeFragment" />
+    <fragment
+        android:id="@+id/GameDetailsFragment"
+        android:name="ba.unsa.etf.rma.videogameapp.GameDetailsFragment"
+        android:label="GameDetailsFragment" />
+</navigation>

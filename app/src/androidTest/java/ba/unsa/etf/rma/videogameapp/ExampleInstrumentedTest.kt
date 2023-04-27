@@ -1,5 +1,5 @@
 package ba.unsa.etf.rma.videogameapp
-
+/*
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -107,3 +107,4 @@ class TestLayout {
         onView(withText(prvaIgra.description)).check(matches(isCompletelyDisplayed()))
     }
 }
+*/

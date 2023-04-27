@@ -1,57 +1,47 @@
 package ba.unsa.etf.rma.videogameapp
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationBarView
 
 class HomeActivity : AppCompatActivity() {
-    private lateinit var logoImage: ImageView
-    private lateinit var homeButton: Button
-    private lateinit var detailsButton: Button
-    private lateinit var searchQuery: TextView
-    private lateinit var searchButton: Button
-    private lateinit var gameList: RecyclerView
-    private lateinit var videoGameListAdapter: VideoGameListAdapter
-    private var videoGameList = GameData.getAll()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        logoImage = findViewById(R.id.logo_image)
-        homeButton = findViewById(R.id.home_button)
-        detailsButton = findViewById(R.id.details_button)
-        searchQuery = findViewById(R.id.search_query_edittext)
-        searchButton = findViewById(R.id.search_button)
-        gameList = findViewById(R.id.game_list)
-        gameList.layoutManager = LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
-        videoGameListAdapter = VideoGameListAdapter(videoGameList,{game -> showGameDetails(game)})
-        gameList.adapter = videoGameListAdapter
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
 
-        homeButton.isEnabled = false
-        logoImage.setImageResource(R.drawable.joystick_logo)
+        val orientation = resources.configuration.orientation
 
-        val extras = intent.extras
-        if(extras == null)
-            detailsButton.isEnabled = false
-        else {
-            detailsButton.setOnClickListener{
-                val game = GameData.getDetails(extras.getString("last_opened_game",""))
-                if (game != null) {
-                    showGameDetails(game)
-                }
-            }
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            val bundle = Bundle()
+            bundle.putString("game_title", GameData.getAll()[0].title)
+            navController.navigate(R.id.GameDetailsFragment, bundle)
+        } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            val navView: BottomNavigationView = findViewById(R.id.bottom_nav)
+            navView.setupWithNavController(navController)
+            val bundle = Bundle()
+            bundle.putString("last_opened_game"," ")
+            navController.navigate(R.id.HomeFragment,bundle)
         }
-    }
-    private fun showGameDetails(game: Game){
-        val intent = Intent(this,GameDetailsActivity::class.java).apply{
-            putExtra("game_title",game.title)
-        }
-        startActivity(intent)
     }
 }
