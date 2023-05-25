@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'ba.unsa.etf.rma.videogameapp'
+    namespace 'ba.etf.rma23.projekat'
     compileSdk 33
 
     defaultConfig {
-        applicationId "ba.unsa.etf.rma.videogameapp"
+        applicationId "ba.etf.rma23.projekat"
         minSdk 25
         targetSdk 33
         versionCode 1

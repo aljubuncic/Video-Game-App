@@ -8,7 +8,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/homeFragmentContainerView"
-        android:name="ba.unsa.etf.rma.videogameapp.HomeFragment"
+        android:name="ba.etf.rma23.projekat.HomeFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
