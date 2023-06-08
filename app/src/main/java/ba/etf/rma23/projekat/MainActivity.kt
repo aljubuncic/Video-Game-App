@@ -17,18 +17,11 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
 
-        val orientation = resources.configuration.orientation
+        val navView: BottomNavigationView = findViewById(R.id.bottom_nav)
+        navView.setupWithNavController(navController)
+        val bundle = Bundle()
+        bundle.putInt("last_opened_game",-1)
+        navController.navigate(R.id.HomeFragment,bundle)
 
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            val bundle = Bundle()
-            bundle.putString("game_title", "")
-            navController.navigate(R.id.GameDetailsFragment, bundle)
-        } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            val navView: BottomNavigationView = findViewById(R.id.bottom_nav)
-            navView.setupWithNavController(navController)
-            val bundle = Bundle()
-            bundle.putString("last_opened_game"," ")
-            navController.navigate(R.id.HomeFragment,bundle)
-        }
     }
 }
