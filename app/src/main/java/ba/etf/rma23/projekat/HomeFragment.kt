@@ -154,7 +154,13 @@ class HomeFragment: Fragment() {
     }
     private fun sortGames(){
         runBlocking {
-            videoGameListAdapter.updateGames(GamesRepository.sortGames())
+            try {
+                videoGameListAdapter.updateGames(GamesRepository.sortGames())
+            }
+            catch (e:java.lang.Exception){
+                val toast = Toast.makeText(context, e.message, Toast.LENGTH_SHORT)
+                toast.show()
+            }
         }
     }
     fun getGamesFromApi(){

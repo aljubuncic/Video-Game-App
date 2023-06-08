@@ -283,7 +283,7 @@ class GamesRepository {
         }
         suspend fun sortGames():List<Game> {
             if(gameList==null)
-                throw Exception("List of games has never been initialised")
+                throw Exception("There has not been any searched games recently")
             val savedGames = AccountGamesRepository.getSavedGames()
             gameList = gameList!!.sortedWith <Game> (object : Comparator <Game> {
                 override fun compare(game1: Game, game2: Game): Int {
