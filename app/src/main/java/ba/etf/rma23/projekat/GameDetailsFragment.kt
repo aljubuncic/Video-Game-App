@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ba.etf.rma23.projekat.data.repositories.AccountGamesRepository
 import ba.etf.rma23.projekat.data.repositories.GamesRepository
+import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.*
 
@@ -37,6 +38,7 @@ class GameDetailsFragment : Fragment(){
     private lateinit var genre: TextView
     private lateinit var description: TextView
     private lateinit var favoriteButton : ImageButton
+    private lateinit var removeButton : ImageButton
     private lateinit var userImpressions: RecyclerView
     private lateinit var userImpressionListAdapter: UserImpressionListAdapter
 
@@ -65,6 +67,8 @@ class GameDetailsFragment : Fragment(){
         description = view.findViewById(R.id.description_textview)
         userImpressions = view.findViewById(R.id.impression_list)
         favoriteButton = view.findViewById(R.id.favorite_button)
+        removeButton = view.findViewById(R.id.remove_button)
+
 
         try {
             val extras = requireArguments()
@@ -78,6 +82,9 @@ class GameDetailsFragment : Fragment(){
 
         favoriteButton.setOnClickListener{
             addToFavorites()
+        }
+        removeButton.setOnClickListener{
+            removeFromFavorites()
         }
 
         userImpressions.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL,false)
@@ -115,6 +122,11 @@ class GameDetailsFragment : Fragment(){
             id = context.resources.getIdentifier("joystick_logo","drawable",context.packageName)
         */
         //coverImage.setImageResource(id)
+        val context = coverImage.context
+        Glide.with(context)
+            .load("https:"+game.coverImage)
+            .placeholder(R.drawable.joystick_logo)
+            .into(coverImage);
 
         platform.text = game.platform
         releaseDate.text = game.releaseDate
@@ -135,6 +147,14 @@ class GameDetailsFragment : Fragment(){
         runBlocking {
             AccountGamesRepository.setHash("3b6569c0-c0b5-4426-a05a-e2b0813408ee")
             AccountGamesRepository.saveGame(game)
+        }
+    }
+
+    private fun removeFromFavorites(){
+        runBlocking {
+            AccountGamesRepository.setHash("3b6569c0-c0b5-4426-a05a-e2b0813408ee")
+            if(!AccountGamesRepository.removeGame(game.id))
+                Toast.makeText(context, "Game is not in the favorites list", Toast.LENGTH_SHORT).show()
         }
     }
 

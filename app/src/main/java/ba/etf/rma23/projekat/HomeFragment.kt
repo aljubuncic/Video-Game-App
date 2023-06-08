@@ -26,6 +26,8 @@ class HomeFragment: Fragment() {
     private var gameDetailsMenuItem: MenuItem? = null
     private lateinit var searchQuery: EditText
     private lateinit var searchButton: Button
+    private lateinit var favoritesButton: Button
+    private lateinit var sortButton: Button
     private lateinit var ageSpinner: Spinner
     private lateinit var gameList: RecyclerView
     private lateinit var videoGameListAdapter: VideoGameListAdapter
@@ -48,18 +50,26 @@ class HomeFragment: Fragment() {
 
         searchQuery = view.findViewById(R.id.search_query_edittext)
         searchButton = view.findViewById(R.id.search_button)
+        favoritesButton = view.findViewById(R.id.favorites_button)
+        sortButton = view.findViewById(R.id.sort_button)
         ageSpinner = view.findViewById(R.id.age_spinner)
         gameList = view.findViewById(R.id.game_list)
         gameList.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        getFavoriteGames()
         videoGameListAdapter =
-            VideoGameListAdapter(videoGameList!!, { game -> showGameDetails(game) })
+            VideoGameListAdapter(listOf(), { game -> showGameDetails(game) })
         gameList.adapter = videoGameListAdapter
+        getFavoriteGames()
 
         val numberList = (0..100).toList()
         val spinnerAdapter=ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, numberList)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         ageSpinner.adapter = spinnerAdapter
+        favoritesButton.setOnClickListener {
+            getFavoriteGames()
+        }
+        sortButton.setOnClickListener {
+            sortGames()
+        }
         searchButton.setOnClickListener{
             ageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -88,7 +98,14 @@ class HomeFragment: Fragment() {
 
         try {
             val extras = requireArguments()
-            if(extras.getString("last_opened_game","").equals(" ")){
+            runBlocking{
+                lastOpenedGame = try {
+                    GamesRepository.getGameById(extras.getInt("last_opened_game"))
+                } catch (e:java.lang.Exception){
+                    null
+                }
+            }
+            if(lastOpenedGame == null){
                 if(homeMenuItem!=null)
                     homeMenuItem!!.isChecked = true
             }
@@ -96,10 +113,7 @@ class HomeFragment: Fragment() {
                 if(gameDetailsMenuItem!=null)
                     gameDetailsMenuItem!!.isEnabled = true
             }
-            if(videoGameList!= null) {
-                lastOpenedGame=
-                    videoGameList!!.find { it.title == extras.getString("last_opened_game", "") }
-            }
+
             bottomNavigationView?.setOnItemSelectedListener {
                     when(it.itemId){
                         R.id.gameDetailsItem -> {
@@ -135,6 +149,12 @@ class HomeFragment: Fragment() {
         runBlocking {
             AccountGamesRepository.setHash("3b6569c0-c0b5-4426-a05a-e2b0813408ee")
             videoGameList = AccountGamesRepository.getSavedGames()
+            videoGameListAdapter.updateGames(videoGameList!!)
+        }
+    }
+    private fun sortGames(){
+        runBlocking {
+            videoGameListAdapter.updateGames(GamesRepository.sortGames())
         }
     }
     fun getGamesFromApi(){

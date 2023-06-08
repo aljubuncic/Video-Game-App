@@ -49,7 +49,7 @@ class GamesRepository {
         }
 
         private fun buildRequestBody(id: Int): RequestBody {
-            val text =  "fields id,name,platforms.id,platforms.name,first_release_date,rating,"  +
+            val text = "fields id,name,platforms.id,platforms.name,first_release_date,rating,"  +
                         "age_ratings.category,age_ratings.rating,cover.url,genres.id,genres.name," +
                         "involved_companies.company.name,involved_companies.developer,involved_companies.publisher,summary; where id = $id;"
             return text.toRequestBody()
@@ -281,11 +281,36 @@ class GamesRepository {
 
             }
         }
-        fun sortGames():List<Game> {
+        suspend fun sortGames():List<Game> {
             if(gameList==null)
                 throw Exception("List of games has never been initialised")
-            gameList!!.sortedBy { game -> game.title }
-            //treba implemenirat za omiljene igrice
+            val savedGames = AccountGamesRepository.getSavedGames()
+            gameList = gameList!!.sortedWith <Game> (object : Comparator <Game> {
+                override fun compare(game1: Game, game2: Game): Int {
+                    if(game1 in savedGames){
+                        if(game2 !in savedGames)
+                            return -1
+                        else{
+                            if(game1.title>game2.title)
+                                return 1
+                            else if (game1.title == game2.title)
+                                return 0
+                            else
+                                return -1
+                        }
+                    }
+                    else if(game2 in savedGames)
+                        return 1
+                    else{
+                        if(game1.title>game2.title)
+                            return 1
+                        else if (game1.title == game2.title)
+                            return 0
+                        else
+                            return -1
+                    }
+                }
+            })
             return gameList!!
         }
     }

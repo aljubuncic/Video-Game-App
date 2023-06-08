@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.converter.gson.GsonConverterFactory
@@ -48,13 +49,10 @@ class AccountGamesRepository {
             return withContext(Dispatchers.IO){
                 if(accountHash == null)
                     throw java.lang.Exception("Hash is null")
-                val requestBodyString = "{\n" +
-                        "  \"game\": {\n" +
-                        "    \"igdb_id\": "+ game.id + ",\n" +
-                        "    \"name\": \"" + game.title + "\"\n" +
-                        "  }\n" +
-                        "}"
-                val requestBody = requestBodyString.toRequestBody()
+                if(game in getSavedGames())
+                    return@withContext game
+                val requestBodyString = "{\"game\": {\"igdb_id\": ${game.id},\"name\": \"${game.title}\"}}"
+                val requestBody = requestBodyString.toRequestBody("application/json".toMediaTypeOrNull())
                 val response = AccountApiConfig.retrofit.saveGame(accountHash!!,requestBody)
                 if(response.isSuccessful) {
                     favoriteGames.add(game)
@@ -91,10 +89,25 @@ class AccountGamesRepository {
         suspend fun removeNonSafe():Boolean{
             return withContext(Dispatchers.IO){
                 val games = getSavedGames()
-                /*games.forEach {
-                    if(it.pegiRating == -1)
-                        if(age < ESRB[])
-                }*/
+                games.forEach {
+                    if(it.pegiRating == -1) {
+                        val ageESRB = ESRB.values.find {
+                            esrbRating -> esrbRating.name ==it.esrbRating
+                        }!!.age
+                        if (age!! < ageESRB) {
+                            val response = removeGame(it.id)
+                            if(!response)
+                                return@withContext false
+                        }
+                    }
+                    else{
+                        if(age!! <it.pegiRating) {
+                            val response = removeGame(it.id)
+                            if (!response)
+                                return@withContext false
+                        }
+                    }
+                }
                 return@withContext true
             }
         }
