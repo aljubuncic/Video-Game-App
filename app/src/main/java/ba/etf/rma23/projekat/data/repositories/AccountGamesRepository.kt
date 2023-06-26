@@ -13,7 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class AccountGamesRepository {
     companion object{
-        var accountHash: String? = null
+        var accountHash: String? = "3b6569c0-c0b5-4426-a05a-e2b0813408ee"
         var age: Int? = null
         var favoriteGames: MutableList<Game> = mutableListOf()
         private var PEGI : MutableMap<Int,Int> = HashMap<Int,Int>()

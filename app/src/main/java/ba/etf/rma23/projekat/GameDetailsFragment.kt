@@ -1,12 +1,15 @@
 package ba.etf.rma23.projekat
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Configuration
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -17,6 +20,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ba.etf.rma23.projekat.data.repositories.AccountGamesRepository
+import ba.etf.rma23.projekat.data.repositories.GameReview
+import ba.etf.rma23.projekat.data.repositories.GameReviewsRepository
 import ba.etf.rma23.projekat.data.repositories.GamesRepository
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -39,7 +44,11 @@ class GameDetailsFragment : Fragment(){
     private lateinit var description: TextView
     private lateinit var favoriteButton : ImageButton
     private lateinit var removeButton : ImageButton
+    private lateinit var reviewInput : EditText
+    private lateinit var ratingInput: EditText
+    private lateinit var addReviewButton: ImageButton
     private lateinit var userImpressions: RecyclerView
+    private lateinit var gameReviews: List<GameReview>
     private lateinit var userImpressionListAdapter: UserImpressionListAdapter
 
     @SuppressLint("RestrictedApi", "MissingInflatedId")
@@ -68,12 +77,14 @@ class GameDetailsFragment : Fragment(){
         userImpressions = view.findViewById(R.id.impression_list)
         favoriteButton = view.findViewById(R.id.favorite_button)
         removeButton = view.findViewById(R.id.remove_button)
+        reviewInput = view.findViewById(R.id.review_input)
+        ratingInput = view.findViewById(R.id.rating_input)
+        addReviewButton = view.findViewById(R.id.add_review_button)
 
 
         try {
             val extras = requireArguments()
             getGameById(extras.getInt("game_id"))
-
             populateViewElements()
         }
         catch (e: IllegalStateException) {
@@ -87,8 +98,14 @@ class GameDetailsFragment : Fragment(){
             removeFromFavorites()
         }
 
+        addReviewButton.setOnClickListener {
+            addReview()
+        }
+
+        getGameReviews()
+
         userImpressions.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL,false)
-        userImpressionListAdapter = UserImpressionListAdapter(game.userImpressions.sortedByDescending { userImpression -> userImpression.timestamp })
+        userImpressionListAdapter = UserImpressionListAdapter(gameReviews)
         userImpressions.adapter = userImpressionListAdapter
 
         if(homeMenuItem!=null)
@@ -126,7 +143,7 @@ class GameDetailsFragment : Fragment(){
         Glide.with(context)
             .load("https:"+game.coverImage)
             .placeholder(R.drawable.joystick_logo)
-            .into(coverImage);
+            .into(coverImage)
 
         platform.text = game.platform
         releaseDate.text = game.releaseDate
@@ -144,13 +161,36 @@ class GameDetailsFragment : Fragment(){
     }
 
     private fun addToFavorites(){
+        if(!isConnected())
+            return
         runBlocking {
             AccountGamesRepository.setHash("3b6569c0-c0b5-4426-a05a-e2b0813408ee")
             AccountGamesRepository.saveGame(game)
         }
     }
 
+    private fun getGameReviews(){
+        if(!isConnected())
+            return
+        runBlocking {
+            AccountGamesRepository.setHash("3b6569c0-c0b5-4426-a05a-e2b0813408ee")
+            gameReviews = GameReviewsRepository.getReviewsForGame(game.id)
+        }
+    }
+
+    private fun addReview(){
+        if(!isConnected())
+            return
+        runBlocking {
+            val gameReview = GameReview(ratingInput.text.toString(),reviewInput.text.toString(),game.id,false)
+            AccountGamesRepository.setHash("3b6569c0-c0b5-4426-a05a-e2b0813408ee")
+            context?.let { GameReviewsRepository.sendReview(it,gameReview) }
+        }
+    }
+
     private fun removeFromFavorites(){
+        if(!isConnected())
+            return
         runBlocking {
             AccountGamesRepository.setHash("3b6569c0-c0b5-4426-a05a-e2b0813408ee")
             if(!AccountGamesRepository.removeGame(game.id))
@@ -159,6 +199,8 @@ class GameDetailsFragment : Fragment(){
     }
 
     private fun getGameById(id: Int){
+        if(!isConnected())
+            return
         runBlocking {
             game = GamesRepository.getGameById(id)
             if (game == null)
@@ -169,5 +211,11 @@ class GameDetailsFragment : Fragment(){
     fun onError() {
         val toast = Toast.makeText(context, "Search error", Toast.LENGTH_SHORT)
         toast.show()
+    }
+
+    private fun isConnected():Boolean{
+        val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo = connectivityManager.activeNetworkInfo
+        return networkInfo?.isConnected == true && networkInfo.isAvailable
     }
 }

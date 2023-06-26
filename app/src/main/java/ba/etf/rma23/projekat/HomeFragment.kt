@@ -1,13 +1,19 @@
 package ba.etf.rma23.projekat
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Configuration
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -33,6 +39,7 @@ class HomeFragment: Fragment() {
     private lateinit var videoGameListAdapter: VideoGameListAdapter
     private var videoGameList: List<Game>? = null
     private var lastOpenedGame: Game? = null
+    private lateinit var networkCallback: ConnectivityManager.NetworkCallback
 
     @SuppressLint("RestrictedApi", "SuspiciousIndentation", "MissingInflatedId")
     override fun onCreateView(
@@ -41,6 +48,7 @@ class HomeFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.home_fragment, container, false)
+
 
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             bottomNavigationView = requireActivity().findViewById(R.id.bottom_nav)
@@ -98,11 +106,13 @@ class HomeFragment: Fragment() {
 
         try {
             val extras = requireArguments()
-            runBlocking{
-                lastOpenedGame = try {
-                    GamesRepository.getGameById(extras.getInt("last_opened_game"))
-                } catch (e:java.lang.Exception){
-                    null
+            if(isConnected()) {
+                runBlocking {
+                    lastOpenedGame = try {
+                        GamesRepository.getGameById(extras.getInt("last_opened_game"))
+                    } catch (e: java.lang.Exception) {
+                        null
+                    }
                 }
             }
             if(lastOpenedGame == null){
@@ -137,6 +147,29 @@ class HomeFragment: Fragment() {
             }
         }
 
+        // Create the network request
+        /*val networkRequest = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .build()
+
+        // Create the network callback
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                // Network is available
+                //isConnected = true
+            }
+
+            override fun onLost(network: Network) {
+                // Network is lost
+                //isConnected = false
+            }
+        }
+
+        // Register the network callback
+        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
+*/
+
         return view
     }
 
@@ -146,13 +179,22 @@ class HomeFragment: Fragment() {
         findNavController().navigate(R.id.GameDetailsFragment,bundle)
     }
     private fun getFavoriteGames(){
-        runBlocking {
-            AccountGamesRepository.setHash("3b6569c0-c0b5-4426-a05a-e2b0813408ee")
-            videoGameList = AccountGamesRepository.getSavedGames()
-            videoGameListAdapter.updateGames(videoGameList!!)
+        if(!isConnected())
+            return
+        try {
+            runBlocking {
+                AccountGamesRepository.setHash("3b6569c0-c0b5-4426-a05a-e2b0813408ee")
+                videoGameList = AccountGamesRepository.getSavedGames()
+                videoGameListAdapter.updateGames(videoGameList!!)
+            }
+        }
+        catch (_: Exception){
+
         }
     }
     private fun sortGames(){
+        if(!isConnected())
+            return
         runBlocking {
             try {
                 videoGameListAdapter.updateGames(GamesRepository.sortGames())
@@ -164,29 +206,43 @@ class HomeFragment: Fragment() {
         }
     }
     fun getGamesFromApi(){
+        if(!isConnected())
+            return
         val scope = CoroutineScope(Job() + Dispatchers.Main)
         // Create a new coroutine on the UI thread
-        scope.launch {
-            // Opcija 1
-            val result = GamesRepository.getGamesByName(searchQuery.text.toString())
-            // Display result of the network request to the user
-            when (result) {
-                is List<Game>? -> onSuccess(result)
-                else -> onError()
+        try {
+            scope.launch {
+                // Opcija 1
+                val result = GamesRepository.getGamesByName(searchQuery.text.toString())
+                // Display result of the network request to the user
+                when (result) {
+                    is List<Game>? -> onSuccess(result)
+                    else -> onError()
+                }
             }
+        }
+        catch (_:Exception){
+
         }
     }
     fun getSafeGamesFromApi(){
+        if(!isConnected())
+            return
         val scope = CoroutineScope(Job() + Dispatchers.Main)
         // Create a new coroutine on the UI thread
-        scope.launch {
-            // Opcija 1
-            val result = GamesRepository.getGamesSafe(searchQuery.text.toString())
-            // Display result of the network request to the user
-            when (result) {
-                is List<Game>? -> onSuccess(result)
-                else -> onError()
+        try {
+            scope.launch {
+                // Opcija 1
+                val result = GamesRepository.getGamesSafe(searchQuery.text.toString())
+                // Display result of the network request to the user
+                when (result) {
+                    is List<Game>? -> onSuccess(result)
+                    else -> onError()
+                }
             }
+        }
+        catch (_:Exception){
+
         }
     }
     fun onSuccess(games: List<Game>){
@@ -197,7 +253,11 @@ class HomeFragment: Fragment() {
     }
     fun onError() {
         val toast = Toast.makeText(context, "Search error", Toast.LENGTH_SHORT)
-        toast.show()
+    toast.show()
+}
+    private fun isConnected():Boolean{
+        val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo = connectivityManager.activeNetworkInfo
+        return networkInfo?.isConnected == true
     }
-
 }

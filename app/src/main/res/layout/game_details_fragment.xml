@@ -164,4 +164,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/details_linear" />
 
+    <EditText
+        android:id="@+id/review_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:ems="10"
+        app:layout_constraintBottom_toTopOf="@+id/impression_list"
+        app:layout_constraintEnd_toStartOf="@id/rating_input"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/details_linear" />
+
+    <EditText
+        android:id="@+id/rating_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="3"
+        android:inputType="number"
+        app:layout_constraintBottom_toTopOf="@id/impression_list"
+        app:layout_constraintEnd_toStartOf="@id/add_review_button"
+        app:layout_constraintStart_toEndOf="@id/review_input"
+        app:layout_constraintTop_toBottomOf="@id/details_linear" />
+
+    <ImageButton
+        android:id="@+id/add_review_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@android:drawable/ic_input_add"
+        app:layout_constraintStart_toEndOf="@id/rating_input"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/details_linear"
+        app:layout_constraintBottom_toTopOf="@id/impression_list"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -20,4 +20,8 @@ interface AccountApi {
     suspend fun getSavedGames(@Path("aid") acHash: String): Response<List<SwaggerGameResponse>>
     @DELETE("account/{aid}/game/{gid}/")
     suspend fun removeGame(@Path("aid") acHash: String,@Path("gid") igdb_id:Int):Response<JSONObject>
+    @POST("account/{aid}/game/{gid}/gamereview")
+    suspend fun sendReview(@Path("aid") acHash:String, @Path("gid") igdb_id:Int,@Body requestBody: RequestBody):Response<JSONObject>
+    @GET("game/{gid}/gamereviews")
+    suspend fun getReviewsForGame(@Path("gid") igdb_id: Int):Response<List<GameReview>>
 }

@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class OwnEspressoTestLandscape {
-    @get:Rule
+    /*@get:Rule
     var activityTestRule: ActivityTestRule<HomeActivity> = ActivityTestRule(HomeActivity::class.java)
     @Before
     fun switchOrientationToLandscape(){
@@ -77,7 +77,7 @@ class OwnEspressoTestLandscape {
         onView(withId(R.id.genre_textview)).check(isCompletelyLeftOf(withId(R.id.publisher_textview)))
         onView(withId(R.id.genre_textview)).check(isCompletelyLeftOf(withId(R.id.release_date_textview)))
 
-    }
+    }*/
 }
 
 

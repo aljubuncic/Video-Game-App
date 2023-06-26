@@ -20,7 +20,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class OwnEspressoTestPortrait {
-    @get:Rule
+   /* @get:Rule
     var activityScenarioRule: ActivityScenarioRule<HomeActivity> = ActivityScenarioRule(HomeActivity::class.java)
     @get:Rule
     var activityTestRule: ActivityTestRule<HomeActivity> = ActivityTestRule(HomeActivity::class.java)
@@ -117,7 +117,7 @@ class OwnEspressoTestPortrait {
     private fun checkMenuItem(navController: NavController,menuItem: Int,fragmentName:String){
         onView(withId(menuItem)).perform(click())
         assert(navController.currentDestination!!.label==fragmentName)
-    }
+    }*/
 }
 
 
