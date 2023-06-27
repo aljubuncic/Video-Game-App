@@ -147,29 +147,6 @@ class HomeFragment: Fragment() {
             }
         }
 
-        // Create the network request
-        /*val networkRequest = NetworkRequest.Builder()
-            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .build()
-
-        // Create the network callback
-        networkCallback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                // Network is available
-                //isConnected = true
-            }
-
-            override fun onLost(network: Network) {
-                // Network is lost
-                //isConnected = false
-            }
-        }
-
-        // Register the network callback
-        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
-*/
-
         return view
     }
 

@@ -16,13 +16,13 @@ class UserImpressionListAdapter () :RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private fun mapGameReviewsInUserImpressions(gameReviews: List<GameReview>){
         gameReviews.forEach loop@{
-            if(it.review ==null && it.rating== null)
+            if(it.review == "null" && it.rating== null)
                 return@loop
-            if(it.review !=null && it.rating!= null) {
+            if(it.review !="null" && it.rating!= null) {
                 userImpressions.add(UserRating(it.username!!, it.timestamp!!.toLong(), it.rating!!.toDouble()))
                 userImpressions.add(UserReview(it.username!!,it.timestamp!!.toLong(),it.review!!))
             }
-            else if(it.review!=null)
+            else if(it.review!="null")
                 userImpressions.add(UserReview(it.username!!,it.timestamp!!.toLong(),it.review!!))
             else if(it.rating!=null)
                 userImpressions.add(UserRating(it.username!!, it.timestamp!!.toLong(), it.rating!!.toDouble()))
