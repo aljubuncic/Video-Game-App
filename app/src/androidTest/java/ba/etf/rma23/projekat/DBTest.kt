@@ -114,7 +114,7 @@ class DBTest {
     fun a3_sendWhileOffline() = runBlocking {
         InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("svc wifi disable")
         InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("svc data disable")
-        Thread.sleep(8000)
+        Thread.sleep(2000)
         var rez =
             GameReviewsRepository.sendReview(context, GameReview(3, "dobro", idIGRE, false, "", ""))
         assert(!rez) { "Should return false" }
@@ -126,11 +126,10 @@ class DBTest {
         var uia = InstrumentationRegistry.getInstrumentation().uiAutomation
         uia.executeShellCommand("svc wifi enable")
         uia.executeShellCommand("svc data enable")
-        Thread.sleep(4000)
+        Thread.sleep(2000)
         var rez = GameReviewsRepository.sendOfflineReviews(context)
         assertEquals(rez, 1)
         executeCountAndCheck(countNotOnline, "broj_reviews", 0)
-
     }
 
     @Test
