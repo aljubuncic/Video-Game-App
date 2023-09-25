@@ -65,6 +65,30 @@ class GameDetailsFragment : Fragment(){
             gameDetailsMenuItem = bottomNavigationView?.menu?.get(1)
         }
 
+        initializeViewElements(view)
+
+        try {
+            val extras = requireArguments()
+            getGameById(extras.getInt("game_id"))
+            populateViewElements()
+        }
+        catch (e: IllegalStateException) {
+            requireActivity().finish()
+        }
+        addListeners()
+        getGameReviews()
+        initializeGameReviewsList()
+        if(homeMenuItem!=null)
+            homeMenuItem!!.isEnabled=true
+        if (gameDetailsMenuItem != null) {
+            gameDetailsMenuItem!!.isChecked = true
+            gameDetailsMenuItem!!.isEnabled=false
+        }
+
+        setListenerOnBottomNavigationView()
+        return view
+    }
+    private fun initializeViewElements(view:View){
         title = view.findViewById(R.id.item_title_textview)
         coverImage = view.findViewById(R.id.cover_imageview)
         platform = view.findViewById(R.id.platform_textview)
@@ -80,17 +104,8 @@ class GameDetailsFragment : Fragment(){
         reviewInput = view.findViewById(R.id.review_input)
         ratingInput = view.findViewById(R.id.rating_input)
         addReviewButton = view.findViewById(R.id.add_review_button)
-
-
-        try {
-            val extras = requireArguments()
-            getGameById(extras.getInt("game_id"))
-            populateViewElements()
-        }
-        catch (e: IllegalStateException) {
-            requireActivity().finish()
-        }
-
+    }
+    private fun addListeners(){
         favoriteButton.setOnClickListener{
             addToFavorites()
         }
@@ -101,35 +116,7 @@ class GameDetailsFragment : Fragment(){
         addReviewButton.setOnClickListener {
             addReview()
         }
-
-        getGameReviews()
-
-        userImpressions.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL,false)
-        userImpressionListAdapter = UserImpressionListAdapter(gameReviews)
-        userImpressions.adapter = userImpressionListAdapter
-
-        if(homeMenuItem!=null)
-            homeMenuItem!!.isEnabled=true
-        if (gameDetailsMenuItem != null) {
-            gameDetailsMenuItem!!.isChecked = true
-            gameDetailsMenuItem!!.isEnabled=false
-        }
-
-        bottomNavigationView?.setOnItemSelectedListener {
-            when(it.itemId){
-                R.id.homeItem -> {
-                        openHomeWindow()
-                    true
-                }
-                R.id.gameDetailsItem -> {
-                    true
-                }
-                else -> false
-            }
-        }
-        return view
     }
-
     private fun populateViewElements(){
         title.text = game.title
 
@@ -152,6 +139,20 @@ class GameDetailsFragment : Fragment(){
         publisher.text = game.publisher
         genre.text = game.genre
         description.text = game.description
+    }
+    private fun setListenerOnBottomNavigationView(){
+        bottomNavigationView?.setOnItemSelectedListener {
+            when(it.itemId){
+                R.id.homeItem -> {
+                    openHomeWindow()
+                    true
+                }
+                R.id.gameDetailsItem -> {
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     private fun openHomeWindow() {
@@ -176,6 +177,11 @@ class GameDetailsFragment : Fragment(){
             AccountGamesRepository.setHash("3b6569c0-c0b5-4426-a05a-e2b0813408ee")
             gameReviews = GameReviewsRepository.getReviewsForGame(game.id)
         }
+    }
+    private fun initializeGameReviewsList(){
+        userImpressions.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL,false)
+        userImpressionListAdapter = UserImpressionListAdapter(gameReviews)
+        userImpressions.adapter = userImpressionListAdapter
     }
 
     private fun addReview(){
@@ -208,7 +214,7 @@ class GameDetailsFragment : Fragment(){
         }
     }
 
-    fun onError() {
+    private fun onError() {
         val toast = Toast.makeText(context, "Search error", Toast.LENGTH_SHORT)
         toast.show()
     }

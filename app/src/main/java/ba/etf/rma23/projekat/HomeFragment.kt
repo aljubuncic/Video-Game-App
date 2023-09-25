@@ -56,7 +56,7 @@ class HomeFragment: Fragment() {
         }
 
         initializeViewElements(view)
-        addListeneres()
+        addListeners()
 
         if (homeMenuItem != null) {
             homeMenuItem!!.isChecked = true
@@ -138,13 +138,13 @@ class HomeFragment: Fragment() {
 
         }
     }
-    fun onSuccess(games: List<Game>){
+    private fun onSuccess(games: List<Game>){
         val toast = Toast.makeText(context, "Games found", Toast.LENGTH_SHORT)
         toast.show()
         videoGameList = games;
         videoGameListAdapter.updateGames(games)
     }
-    fun onError() {
+    private fun onError() {
         val toast = Toast.makeText(context, "Search error", Toast.LENGTH_SHORT)
     toast.show()
 }
@@ -166,7 +166,7 @@ class HomeFragment: Fragment() {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         ageSpinner.adapter = spinnerAdapter
     }
-    private fun addListeneres(){
+    private fun addListeners(){
         favoritesButton.setOnClickListener {
             getFavoriteGames()
         }
