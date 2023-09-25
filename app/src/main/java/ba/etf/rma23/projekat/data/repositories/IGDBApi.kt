@@ -7,10 +7,10 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface IGDBApi {
-    @Headers("Client-ID: f8lhsi8lnzno5s5qsukldo03lwxmcf","Authorization: Bearer 12ftnuz6wcunxksxgf6mikq2jousqz")
+    @Headers("Client-ID: " + BuildConfig.IGDB_API_CLIENT_ID,"Authorization: " + BuildConfig.IGDB_API_AUTHORIZATION)
     @POST("games")
     suspend fun getGamesByName(@Query("fields") fields:String, @Query("search") name:String, @Query("limit") limit:Int):Response<List<GameResponse>>
-    @Headers("Client-ID: f8lhsi8lnzno5s5qsukldo03lwxmcf","Authorization: Bearer 12ftnuz6wcunxksxgf6mikq2jousqz")
+    @Headers("Client-ID: " + BuildConfig.IGDB_API_CLIENT_ID,"Authorization: " + BuildConfig.IGDB_API_AUTHORIZATION)
     @POST("games")
     suspend fun getGamesSafe(@Body requestBody: RequestBody):Response<List<GameResponse>>
 

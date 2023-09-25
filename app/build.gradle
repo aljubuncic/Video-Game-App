@@ -8,6 +8,11 @@ android {
     compileSdk 33
 
     defaultConfig {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+        buildConfigField "String", "IGDB_API_AUTHORIZATION", "\"${properties.getProperty('IGDB_API_AUTHORIZATION')}\""
+        buildConfigField "String", "IGDB_API_CLIENT_ID", "\"${properties.getProperty('IGDB_API_CLIENT_ID')}\""
         applicationId "ba.etf.rma23.projekat"
         minSdk 25
         targetSdk 33
