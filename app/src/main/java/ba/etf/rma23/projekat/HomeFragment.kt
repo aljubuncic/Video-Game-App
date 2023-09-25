@@ -49,104 +49,20 @@ class HomeFragment: Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.home_fragment, container, false)
 
-
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             bottomNavigationView = requireActivity().findViewById(R.id.bottom_nav)
             homeMenuItem = bottomNavigationView?.menu?.get(0)
             gameDetailsMenuItem = bottomNavigationView?.menu?.get(1)
         }
 
-        searchQuery = view.findViewById(R.id.search_query_edittext)
-        searchButton = view.findViewById(R.id.search_button)
-        favoritesButton = view.findViewById(R.id.favorites_button)
-        sortButton = view.findViewById(R.id.sort_button)
-        ageSpinner = view.findViewById(R.id.age_spinner)
-        gameList = view.findViewById(R.id.game_list)
-        gameList.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        videoGameListAdapter =
-            VideoGameListAdapter(listOf(), { game -> showGameDetails(game) })
-        gameList.adapter = videoGameListAdapter
-        getFavoriteGames()
-
-        val numberList = (0..100).toList()
-        val spinnerAdapter=ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, numberList)
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        ageSpinner.adapter = spinnerAdapter
-        favoritesButton.setOnClickListener {
-            getFavoriteGames()
-        }
-        sortButton.setOnClickListener {
-            sortGames()
-        }
-        searchButton.setOnClickListener{
-            ageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    val selectedAge = ageSpinner.selectedItem as Int
-                    if(selectedAge>18){
-                        GamesRepository.setAge(selectedAge)
-                        getGamesFromApi()
-                    }
-                    else {
-                        GamesRepository.setAge(selectedAge)
-                        getSafeGamesFromApi()
-                    }
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    GamesRepository.setAge(null)
-                    getSafeGamesFromApi()
-                }
-            }
-        }
+        initializeViewElements(view)
+        addListeneres()
 
         if (homeMenuItem != null) {
             homeMenuItem!!.isChecked = true
             homeMenuItem!!.isEnabled = false
         }
-
-        try {
-            val extras = requireArguments()
-            if(isConnected()) {
-                runBlocking {
-                    lastOpenedGame = try {
-                        GamesRepository.getGameById(extras.getInt("last_opened_game"))
-                    } catch (e: java.lang.Exception) {
-                        null
-                    }
-                }
-            }
-            if(lastOpenedGame == null){
-                if(homeMenuItem!=null)
-                    homeMenuItem!!.isChecked = true
-            }
-            else {
-                if(gameDetailsMenuItem!=null)
-                    gameDetailsMenuItem!!.isEnabled = true
-            }
-
-            bottomNavigationView?.setOnItemSelectedListener {
-                    when(it.itemId){
-                        R.id.gameDetailsItem -> {
-                            if (lastOpenedGame != null) {
-                                showGameDetails(lastOpenedGame!!)
-                                true
-                            }
-                            else
-                                false
-                        }
-                        R.id.homeItem -> {
-                            true
-                        }
-                        else -> false
-                    }
-                }
-        } catch (_: IllegalStateException) {
-            if (gameDetailsMenuItem != null) {
-                gameDetailsMenuItem!!.isChecked = false
-                gameDetailsMenuItem!!.isEnabled = false
-            }
-        }
-
+        getLastOpenedGame()
         return view
     }
 
@@ -232,6 +148,100 @@ class HomeFragment: Fragment() {
         val toast = Toast.makeText(context, "Search error", Toast.LENGTH_SHORT)
     toast.show()
 }
+    private fun initializeViewElements(view:View){
+        searchQuery = view.findViewById(R.id.search_query_edittext)
+        searchButton = view.findViewById(R.id.search_button)
+        favoritesButton = view.findViewById(R.id.favorites_button)
+        sortButton = view.findViewById(R.id.sort_button)
+        ageSpinner = view.findViewById(R.id.age_spinner)
+        gameList = view.findViewById(R.id.game_list)
+        gameList.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        videoGameListAdapter =
+            VideoGameListAdapter(listOf(), { game -> showGameDetails(game) })
+        gameList.adapter = videoGameListAdapter
+        getFavoriteGames()
+
+        val numberList = (0..100).toList()
+        val spinnerAdapter=ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, numberList)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        ageSpinner.adapter = spinnerAdapter
+    }
+    private fun addListeneres(){
+        favoritesButton.setOnClickListener {
+            getFavoriteGames()
+        }
+        sortButton.setOnClickListener {
+            sortGames()
+        }
+        searchButton.setOnClickListener{
+            ageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selectedAge = ageSpinner.selectedItem as Int
+                    if(selectedAge>18){
+                        GamesRepository.setAge(selectedAge)
+                        getGamesFromApi()
+                    }
+                    else {
+                        GamesRepository.setAge(selectedAge)
+                        getSafeGamesFromApi()
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    GamesRepository.setAge(null)
+                    getSafeGamesFromApi()
+                }
+            }
+        }
+    }
+    private fun getLastOpenedGame(){
+        try {
+            val extras = requireArguments()
+            if(isConnected()) {
+                runBlocking {
+                    lastOpenedGame = try {
+                        GamesRepository.getGameById(extras.getInt("last_opened_game"))
+                    } catch (e: java.lang.Exception) {
+                        null
+                    }
+                }
+            }
+            if(lastOpenedGame == null){
+                if(homeMenuItem!=null)
+                    homeMenuItem!!.isChecked = true
+            }
+            else {
+                if(gameDetailsMenuItem!=null)
+                    gameDetailsMenuItem!!.isEnabled = true
+            }
+
+            setListenerOnBottomNavigationView()
+
+        } catch (_: IllegalStateException) {
+            if (gameDetailsMenuItem != null) {
+                gameDetailsMenuItem!!.isChecked = false
+                gameDetailsMenuItem!!.isEnabled = false
+            }
+        }
+    }
+    private fun setListenerOnBottomNavigationView(){
+        bottomNavigationView?.setOnItemSelectedListener {
+            when(it.itemId){
+                R.id.gameDetailsItem -> {
+                    if (lastOpenedGame != null) {
+                        showGameDetails(lastOpenedGame!!)
+                        true
+                    }
+                    else
+                        false
+                }
+                R.id.homeItem -> {
+                    true
+                }
+                else -> false
+            }
+        }
+    }
     private fun isConnected():Boolean{
         val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo = connectivityManager.activeNetworkInfo
